@@ -3,8 +3,9 @@
  * Preventing TS checks with files presented in the video for a better presentation.
  */
 import type { Message } from 'ai';
-import React, { type RefCallback, useEffect, useState } from 'react';
+import React, { type RefCallback, useEffect, useRef, useState } from 'react';
 import { ClientOnly } from 'remix-utils/client-only';
+import { useAuth, SignInButton } from '@clerk/remix';
 import { Menu } from '~/components/sidebar/Menu.client';
 import { IconButton } from '~/components/ui/IconButton';
 import { Workbench } from '~/components/workbench/Workbench.client';
@@ -31,6 +32,8 @@ import { ScreenshotStateManager } from './ScreenshotStateManager';
 import { toast } from 'react-toastify';
 import type { ActionAlert } from '~/types/actions';
 import ChatAlert from './ChatAlert';
+import { redirect, type LoaderFunction } from '@remix-run/cloudflare';
+import { getAuth } from '@clerk/remix/ssr.server';
 
 const TEXTAREA_MIN_HEIGHT = 76;
 
@@ -65,6 +68,15 @@ interface BaseChatProps {
   clearAlert?: () => void;
 }
 
+export const loader: LoaderFunction = async (args) => {
+  const { userId } = await getAuth(args);
+
+  if (!userId) {
+    throw redirect('/sign-in?redirect_url=' + encodeURIComponent(args.request.url));
+  }
+
+  return { userId };
+};
 export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
   (
     {
@@ -99,6 +111,8 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     },
     ref,
   ) => {
+    const { isSignedIn } = useAuth();
+    const signInButtonRef = useRef<HTMLButtonElement>(null);
     const TEXTAREA_MAX_HEIGHT = chatStarted ? 400 : 200;
     const [apiKeys, setApiKeys] = useState<Record<string, string>>(() => {
       const savedKeys = Cookies.get('apiKeys');
@@ -215,8 +229,12 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
         setIsListening(false);
       }
     };
-
     const handleSendMessage = (event: React.UIEvent, messageInput?: string) => {
+      if (!isSignedIn) {
+        signInButtonRef.current?.click();
+        return;
+      }
+
       if (sendMessage) {
         sendMessage(event, messageInput);
 
@@ -294,11 +312,21 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
         className={classNames(styles.BaseChat, 'relative flex h-full w-full overflow-hidden')}
         data-chat-visible={showChat}
       >
+        <div className="hidden">
+          <SignInButton mode="modal">
+            <button
+              ref={signInButtonRef}
+              className="px-4 py-2 rounded-md border border-black bg-white text-black text-sm hover:shadow-[4px_4px_0px_0px_rgba(0,0,0)] transition duration-200"
+            >
+              Sign In
+            </button>
+          </SignInButton>
+        </div>
         <ClientOnly>{() => <Menu />}</ClientOnly>
         <div ref={scrollRef} className="flex flex-col lg:flex-row overflow-y-auto w-full h-full">
           <div className={classNames(styles.Chat, 'flex flex-col flex-grow lg:min-w-[var(--chat-min-width)] h-full')}>
             {!chatStarted && (
-              <div id="intro" className="mt-[16vh] max-w-chat mx-auto text-center px-4 lg:px-0">
+              <div id="intro" className="mt-[4vh] max-w-chat mx-auto text-center px-4 lg:px-0">
                 <h1 className="text-3xl lg:text-6xl font-bold text-bolt-elements-textPrimary mb-4 animate-fade-in">
                   Where ideas begin
                 </h1>
@@ -594,3 +622,5 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     return <Tooltip.Provider delayDuration={200}>{baseChat}</Tooltip.Provider>;
   },
 );
+
+BaseChat.displayName = 'BaseChat';

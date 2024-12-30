@@ -1,17 +1,18 @@
 import { useStore } from '@nanostores/react';
-import type { LinksFunction } from '@remix-run/cloudflare';
-import { Links, Meta, Outlet, Scripts, ScrollRestoration } from '@remix-run/react';
+import type { LinksFunction, LoaderFunction } from '@remix-run/cloudflare';
+import { Links, Meta, Outlet, Scripts, ScrollRestoration, useLoaderData } from '@remix-run/react';
+import type { SerializeFrom } from '@remix-run/cloudflare';
 import tailwindReset from '@unocss/reset/tailwind-compat.css?url';
 import { themeStore } from './lib/stores/theme';
 import { stripIndents } from './utils/stripIndent';
 import { createHead } from 'remix-island';
 import { useEffect } from 'react';
-
 import reactToastifyStyles from 'react-toastify/dist/ReactToastify.css?url';
 import globalStyles from './styles/index.scss?url';
 import xtermStyles from '@xterm/xterm/css/xterm.css?url';
-
 import 'virtual:uno.css';
+import { rootAuthLoader } from '@clerk/remix/ssr.server';
+import { ClerkApp } from '@clerk/remix';
 
 export const links: LinksFunction = () => [
   {
@@ -79,22 +80,39 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 import { logStore } from './lib/stores/logs';
+interface LoaderData {
+  sessionId: string | null;
+  userId: string | null;
+  getToken: (() => Promise<string>) | null;
+}
 
-export default function App() {
+export const loader: LoaderFunction = (args) => {
+  return rootAuthLoader(args, ({ request }) => {
+    const { sessionId, userId } = request.auth;
+    return { sessionId, userId };
+  });
+};
+
+const App = () => {
   const theme = useStore(themeStore);
+  const { sessionId, userId } = useLoaderData<SerializeFrom<LoaderData>>();
 
   useEffect(() => {
     logStore.logSystem('Application initialized', {
       theme,
+      sessionId,
+      userId,
       platform: navigator.platform,
       userAgent: navigator.userAgent,
       timestamp: new Date().toISOString(),
     });
-  }, []);
+  }, [sessionId, userId]);
 
   return (
     <Layout>
       <Outlet />
     </Layout>
   );
-}
+};
+
+export default ClerkApp(App);
