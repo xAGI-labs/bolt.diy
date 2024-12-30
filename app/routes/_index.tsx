@@ -4,19 +4,20 @@ import { BaseChat } from '~/components/chat/BaseChat';
 import { Chat } from '~/components/chat/Chat.client';
 import { Header } from '~/components/header/Header';
 import BackgroundRays from '~/components/ui/BackgroundRays';
+import { SignInButton, SignOutButton, SignUpButton, SignedIn, SignedOut, UserButton } from "@clerk/remix";
 
 export const meta: MetaFunction = () => {
-  return [{ title: 'Appdesk' }, { name: 'description', content: 'Appdesk: Code at the speed of thought, an AI-powered IDE for your browser.' }];
+	return [{ title: 'Appdesk' }, { name: 'description', content: 'Appdesk: Code at the speed of thought, an AI-powered IDE for your browser.' }];
 };
 
 export const loader = () => json({});
 
 export default function Index() {
-  return (
-    <div className="flex flex-col h-full w-full bg-bolt-elements-background-depth-1">
-      <BackgroundRays />
-      <Header />
-      <ClientOnly fallback={<BaseChat />}>{() => <Chat />}</ClientOnly>
-    </div>
-  );
+	return (
+		<div className="flex flex-col h-full w-full bg-bolt-elements-background-depth-1">
+			<BackgroundRays />
+			<Header />
+			<ClientOnly fallback={<BaseChat />}>{() => <Chat />}</ClientOnly>
+		</div>
+	);
 }
