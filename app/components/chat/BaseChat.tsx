@@ -12,7 +12,8 @@ import { classNames } from '~/utils/classNames';
 import { MODEL_LIST, PROVIDER_LIST, initializeModelList } from '~/utils/constants';
 import { Messages } from './Messages.client';
 import { SendButton } from './SendButton.client';
-import { APIKeyManager } from './APIKeyManager';
+
+// import { APIKeyManager } from './APIKeyManager';
 import Cookies from 'js-cookie';
 import * as Tooltip from '@radix-ui/react-tooltip';
 
@@ -389,7 +390,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                         providerList={providerList || (PROVIDER_LIST as ProviderInfo[])}
                         apiKeys={apiKeys}
                       />
-                      {(providerList || []).length > 0 && provider && (
+                      {/* {(providerList || []).length > 0 && provider && (
                         <APIKeyManager
                           provider={provider}
                           apiKey={apiKeys[provider.name] || ''}
@@ -399,7 +400,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                             Cookies.set('apiKeys', JSON.stringify(newApiKeys));
                           }}
                         />
-                      )}
+                      )} */}
                     </div>
                   </div>
                   <FilePreview

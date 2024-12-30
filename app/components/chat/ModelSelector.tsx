@@ -53,12 +53,17 @@ export const ModelSelector = ({
     );
   }
 
+  // Filter providerList to only include "Anthropic" and "OpenAI"
+  const filteredProviderList = providerList.filter(
+    (provider) => provider.name === 'Anthropic' || provider.name === 'OpenAI',
+  );
+
   return (
     <div className="mb-2 flex gap-2 flex-col sm:flex-row">
       <select
         value={provider?.name ?? ''}
         onChange={(e) => {
-          const newProvider = providerList.find((p: ProviderInfo) => p.name === e.target.value);
+          const newProvider = filteredProviderList.find((p: ProviderInfo) => p.name === e.target.value);
 
           if (newProvider && setProvider) {
             setProvider(newProvider);
@@ -72,7 +77,7 @@ export const ModelSelector = ({
         }}
         className="flex-1 p-2 rounded-lg border border-bolt-elements-borderColor bg-bolt-elements-prompt-background text-bolt-elements-textPrimary focus:outline-none focus:ring-2 focus:ring-bolt-elements-focus transition-all"
       >
-        {providerList.map((provider: ProviderInfo) => (
+        {filteredProviderList.map((provider: ProviderInfo) => (
           <option key={provider.name} value={provider.name}>
             {provider.name}
           </option>

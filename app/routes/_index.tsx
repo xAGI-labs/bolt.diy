@@ -6,7 +6,10 @@ import { Header } from '~/components/header/Header';
 import BackgroundRays from '~/components/ui/BackgroundRays';
 
 export const meta: MetaFunction = () => {
-  return [{ title: 'Appdesk' }, { name: 'description', content: 'Appdesk: Code at the speed of thought, an AI-powered IDE for your browser.' }];
+  return [
+    { title: 'Appdesk' },
+    { name: 'description', content: 'Appdesk: Code at the speed of thought, an AI-powered IDE for your browser.' },
+  ];
 };
 
 export const loader = () => json({});
