@@ -52,7 +52,7 @@ ENV WRANGLER_SEND_METRICS=false \
 RUN mkdir -p /root/.config/.wrangler && \
     echo '{"enabled":false}' > /root/.config/.wrangler/metrics.json
 
-RUN pnpm run build
+RUN CI=false pnpm run build 
 
 CMD [ "pnpm", "run", "dockerstart"]
 
@@ -89,4 +89,4 @@ ENV GROQ_API_KEY=${GROQ_API_KEY} \
     RUNNING_IN_DOCKER=true
 
 RUN mkdir -p ${WORKDIR}/run
-CMD pnpm run dev --host
+CMD pnpm run dev --host 
